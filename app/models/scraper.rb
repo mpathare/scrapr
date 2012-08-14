@@ -1,66 +1,47 @@
 class Scraper
-  BLACKLIST = ["transparent", "icon", "banner", "sprite"]
+  require 'open-uri'
 
-  attr_reader :response
-
-  def initialize
-    @response = {}
+  def initialize(url)
+    begin
+      @response = { "status" => "ok"}
+      @page = Nokogiri::HTML(open(url))
+    rescue Exception => e
+      @response.merge!({ "status" => "fail" })
+    end
   end
 
-  def scrape(url)
-    begin
-      url = "http://#{url}" unless url[0..3] == "http"
-      page = Nokogiri::HTML(open(url))
-      @uri = URI.parse(url)
-      @host = @uri.host
-      @scheme = @uri.scheme
-      get_images(page)
-      get_title(page)
-      get_description(page)
-      @response.merge({ status: "OK" })
-    rescue Exception => e
-      @response.merge({ status: "Fail" })
+  def scrape
+    unless @response["status"] == "fail"
+      @response.merge!({ "title" => '', "description" => '', "images" => [] })
+      get_title
+      get_description
+      get_images
     end
     @response
   end
 
-  def get_title(page)
-    @response.merge({ title: page.title })
-  end
-
-  def get_description(page)
-    @response.merge({ description: page.css("meta[name='description']").first.attributes['content'].value })
-  end
-
-  def get_images(page)
-    page.xpath('//*[@itemprop="image"]').each { |node| add_image node, 'content' }
-    page.css('img').each { |node| add_image node, 'src' }
-    @response.merge({ images: @images })
-  end
-
   private
 
-  def add_image(node, val)
-    debugger
+  def get_title
+    @response["title"] = @page.title
+  end
+
+  def get_description
+    @page.css("meta").each do |meta|
+      if meta.attributes['name'] && meta.attributes['name'].value.downcase == "description"
+        @response["description"] = meta.attributes['content'].value
+      end
+    end
+  end
+
+  def get_images
+    @page.css('img').each { |img| parse_image(img, 'src') }
+    @page.xpath('//*[@itemprop="image"]').each { |node| parse_image(node, 'content') }
+  end
+
+  def parse_image(node, val)
     image_name = node.attributes[val].value.split("/").last.downcase
-    @images << build_img_url(node.attributes[val].value) unless @images.include?(node.attributes[val].value) || is_blacklisted?(image_name)
-  end
-
-  def is_blacklisted?(image_name)
-    blacklisted = false
-    BLACKLIST.each do |blacklist|
-      blacklisted = true if image_name.index(blacklist)
-    end
-    blacklisted
-  end
-
-  def build_img_url(src)
-    if src.scan(/(http|https):\/\//).empty?
-      url = "#{@scheme}://#{@host}"
-      url += "/" unless src[0] == '/'
-      url += src
-    else
-      src
-    end
+    path = node.attributes[val].value
+    @response['images'] << path unless @response["images"].include?(node.attributes[val].value)
   end
 end

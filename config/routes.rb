@@ -1,3 +1,5 @@
 Scrapr::Application.routes.draw do
-  resource :scrapers
+  namespace :api do
+    resource :scrapers, :only => [:show]
+  end
 end
