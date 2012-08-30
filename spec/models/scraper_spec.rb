@@ -67,11 +67,23 @@ describe Scraper, "#scrape" do
   context "with a limit parameter" do
     it "returned images are <= limit" do
       scraper = Scraper.new("#{Rails.root}/spec/factories/multiple_images.html")
-      scraper.scrape(2).should == {
+      options = { :image_limit => 2 }
+      scraper.scrape(options).should == {
                                   "status"      => "ok",
                                   "title"       => "Valid Title",
                                   "description" => "valid description",
                                   "images"      => ["/s3.amazonaws.com/images/valid.png", "/s3.amazonaws.com/images/valid_01.png"]
+                               }
+    end
+
+    it "returned images are 0 if limit is not a number" do
+      scraper = Scraper.new("#{Rails.root}/spec/factories/multiple_images.html")
+      options = { :image_limit => "foo" }
+      scraper.scrape(options).should == {
+                                  "status"      => "ok",
+                                  "title"       => "Valid Title",
+                                  "description" => "valid description",
+                                  "images"      => []
                                }
     end
   end
