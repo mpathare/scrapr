@@ -38,6 +38,7 @@ class Scraper
   end
 
   def get_images
+    @page.css("meta[property='og:image']").each { |node| parse_image(node, 'content') }
     @page.css('img').each { |img| parse_image(img, 'src') }
     @page.xpath('//*[@itemprop="image"]').each { |node| parse_image(node, 'content') }
   end

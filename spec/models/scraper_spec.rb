@@ -85,4 +85,16 @@ describe Scraper, "#scrape" do
                                         }
     end
   end
+
+  context "page has open graph meta tags" do
+    it "returned images should contain images from the open graph meta tags" do
+      scraper = Scraper.new("#{Rails.root}/spec/factories/open_graph_valid.html")
+      scraper.scrape.should == {
+                                 "status"      => "ok",
+                                 "title"       => "Valid Title",
+                                 "description" => "valid description",
+                                 "images"      => ["/s3.amazonaws.com/images/valid_02.png", "/s3.amazonaws.com/images/valid.png"]
+                               }
+    end
+  end
 end
