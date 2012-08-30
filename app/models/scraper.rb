@@ -1,6 +1,8 @@
 class Scraper
   require 'open-uri'
 
+  BLACKLIST = ["sprite", "icon", "transparent"]
+
   def initialize(url)
     begin
       @response = { "status" => "ok"}
@@ -42,6 +44,8 @@ class Scraper
   def parse_image(node, val)
     image_name = node.attributes[val].value.split("/").last.downcase
     path = node.attributes[val].value
-    @response['images'] << path unless @response["images"].include?(node.attributes[val].value)
+    unless @response["images"].include?(node.attributes[val].value) || Scraper::BLACKLIST.any? { |blacklist| image_name.index(blacklist) }
+      @response['images'] << path
+    end
   end
 end
