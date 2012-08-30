@@ -1,9 +1,8 @@
 class Api::ScrapersController < ApplicationController
-  respond_to :json
+  respond_to :json, :html
 
   def show
-    url = params[:url]
-    @response = Scraper.new(url).scrape
+    @response = Scraper.new(params[:url]).scrape(params)
     respond_with @response
   end
 end

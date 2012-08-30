@@ -12,9 +12,10 @@ class Scraper
     end
   end
 
-  def scrape
+  def scrape(options = {})
     unless @response["status"] == "fail"
       @response.merge!({ "title" => '', "description" => '', "images" => [] })
+      @image_limit = options[:image_limit]
       get_title
       get_description
       get_images
@@ -37,6 +38,7 @@ class Scraper
   end
 
   def get_images
+    @page.css("meta[property='og:image']").each { |node| parse_image(node, 'content') }
     @page.css('img').each { |img| parse_image(img, 'src') }
     @page.xpath('//*[@itemprop="image"]').each { |node| parse_image(node, 'content') }
   end
@@ -45,7 +47,15 @@ class Scraper
     image_name = node.attributes[val].value.split("/").last.downcase
     path = node.attributes[val].value
     unless @response["images"].include?(node.attributes[val].value) || Scraper::BLACKLIST.any? { |blacklist| image_name.index(blacklist) }
-      @response['images'] << path
+      @response['images'] << path if under_returned_images_limit?
+    end
+  end
+
+  def under_returned_images_limit?
+    if @image_limit
+      @response['images'].size < @image_limit.to_i
+    else
+      true
     end
   end
 end
