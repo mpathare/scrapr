@@ -63,4 +63,16 @@ describe Scraper, "#scrape" do
                                }
     end
   end
+
+  context "with a limit parameter" do
+    it "returned images are <= limit" do
+      scraper = Scraper.new("#{Rails.root}/spec/factories/multiple_images.html")
+      scraper.scrape(2).should == {
+                                  "status"      => "ok",
+                                  "title"       => "Valid Title",
+                                  "description" => "valid description",
+                                  "images"      => ["/s3.amazonaws.com/images/valid.png", "/s3.amazonaws.com/images/valid_01.png"]
+                               }
+    end
+  end
 end
