@@ -1,0 +1,5 @@
+<h3><%= @response["title"] %></h3>
+<h5><%= @response["description"] %></h5>
+<%= @response["images"].each do |image| %>
+  <%= image_tag image %></br>
+<% end %>

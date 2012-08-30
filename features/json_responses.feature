@@ -23,3 +23,15 @@ Feature: json responses
        "status": "ok"
       }
     """
+
+  Scenario: valid response with title, description and images limited by the parameter
+    When I make a GET request to scraper with "multiple_images.html" and a limit of 2
+    Then I should see the following json response:
+    """
+      {
+       "images": ["/s3.amazonaws.com/images/valid.png", "/s3.amazonaws.com/images/valid_01.png"],
+       "title": "Valid Title",
+       "description": "valid description",
+       "status": "ok"
+      }
+    """
