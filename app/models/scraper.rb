@@ -18,7 +18,7 @@ class Scraper
       @image_limit = options[:image_limit]
       get_title
       get_description
-      get_images()
+      get_images
     end
     @response
   end
@@ -37,7 +37,7 @@ class Scraper
     end
   end
 
-  def get_images()
+  def get_images
     @page.css('img').each { |img| parse_image(img, 'src') }
     @page.xpath('//*[@itemprop="image"]').each { |node| parse_image(node, 'content') }
   end
