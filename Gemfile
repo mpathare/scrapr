@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.7'
-gem 'nokogiri', '1.5.5'
+gem 'nokogiri', '1.10.8'
 gem 'debugger'
 
 group :development, :test do
